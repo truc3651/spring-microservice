@@ -1,0 +1,57 @@
+server:
+  port: 8001
+
+flyway:
+  user: postgres
+  password: postgres
+  locations: filesystem:db/migration
+  schema: products
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/products?currentSchema=products
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  cloud:
+    function:
+      definition: messageProcessor
+    stream:
+      default:
+        contentType: application/json
+      kafka:
+        binder:
+          brokers: localhost
+          defaultBrokerPort: 9092
+          producer:
+            configuration:
+              value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          consumer:
+            configuration:
+              value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+              spring.json.value.default.type: com.example.api.event.Event
+        bindings:
+          messageProcessor-in-0.consumer:
+            enableDlq: true
+            dlqName: product-dead-letter-queue
+      bindings:
+        messageProcessor-in-0:
+          destination: products
+          group: productsGroup
+          consumer:
+            partitioned: true
+            instance-index: 0
+            # serialize
+            configuration:
+              spring.json.use.type.headers: false
+            # retry
+            maxAttempts: 3
+            backOffInitialInterval: 500
+            backOffMaxInterval: 1000
+            backOffMultiplier: 2.0

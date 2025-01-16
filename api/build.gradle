@@ -1,0 +1,19 @@
+plugins {
+    id 'java-library'
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+}
+
+dependencies {
+    implementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
+    api 'org.springframework:spring-context'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    implementation "org.springdoc:springdoc-openapi-starter-common:${openApiVersion}"
+    implementation "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}

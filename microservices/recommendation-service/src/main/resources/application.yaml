@@ -1,0 +1,20 @@
+server:
+  port: 8002
+
+flyway:
+  user: postgres
+  password: postgres
+  locations: filesystem:db/migration
+  schema: recommendations
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/recommendations?currentSchema=recommendations
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
