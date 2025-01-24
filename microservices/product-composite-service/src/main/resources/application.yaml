@@ -2,10 +2,28 @@ server:
   port: 8004
 
 app:
-  product-service: http://localhost:8001
-  recommendation-service: http://localhost:8002
-  review-service: http://localhost:8003
+  eureka-server: localhost
+  eureka-username: username
+  eureka-password: password
+  product-service: http://product
+  recommendation-service: http://recommendation
+  review-service: http://review
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${app.eureka-username}:${app.eureka-password}@${app.eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+# health check
+management.endpoint.health.show-details: always
+management.endpoints.web.exposure.include: health
+
+#server.forward-headers-strategy: framework
 api:
   version: 1.0.0
   title: Sample API
@@ -71,27 +89,44 @@ springdoc:
   packagesToScan: com.example.composite
   pathsToMatch: /**
 
-spring.cloud:
-  stream:
-    kafka:
-      binder:
-        brokers: localhost
-        defaultBrokerPort: 9092
-        configuration.value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    bindings:
-      products-out-0:
-        destination: products
-        producer:
-          partition-key-expression: headers['partitionKey']
-          partition-count: 2
-      recommendations-out-0:
-        destination: recommendations
-        producer:
-          partition-key-expression: headers['partitionKey']
-          partition-count: 2
-      reviews-out-0:
-        destination: reviews
-        producer:
-          partition-key-expression: headers['partitionKey']
-          partition-count: 2
+  swagger-ui:
+    oauth2-redirect-url: /swagger-ui/oauth2-redirect.html
+    oauth:
+      clientId: writer
+      clientSecret: secret-writer
+      useBasicAuthenticationWithAccessCodeGrant: true
+  oAuthFlow:
+#    authorizationUrl: https://localhost:8443/oauth2/authorize
+#    tokenUrl: https://localhost:8443/oauth2/token
+    authorizationUrl: https://localhost:9999/oauth2/authorize
+    tokenUrl: https://localhost:9999/oauth2/token
 
+# security
+spring.security.oauth2.resourceserver.jwt.issuer-uri: http://localhost:9999
+
+spring:
+  application:
+    name: product-composite
+  cloud:
+    stream:
+      default:
+        contentType: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092
+      bindings:
+        productProducer-out-0:
+          destination: product-topic
+          producer:
+            partitionKeyExpression: headers.partitionKey
+            partitionCount: 2
+        recommendationProducer-out-0:
+          destination: recommendation-topic
+          producer:
+            partitionKeyExpression: headers.partitionKey
+            partitionCount: 2
+        reviewProducer-out-0:
+          destination: review-topic
+          producer:
+            partitionKeyExpression: headers.partitionKey
+            partitionCount: 2

@@ -1,0 +1,78 @@
+server.port: 8443
+server.ssl:
+  key-store-type: PKCS12
+  key-store: classpath:keystore/edge.p12
+  key-store-password: password
+  key-alias: localhost
+
+spring.main.web-application-type: reactive
+spring.application.name: gateway
+
+# health check
+management.endpoint.health.show-details: always
+management.endpoints.web.exposure.include: health
+
+app:
+  eureka-server: localhost
+  eureka-username: username
+  eureka-password: password
+  product-composite: http://product-composite
+  product-service: http://product
+  recommendation-service: http://recommendation
+  review-service: http://review
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${app.eureka-username}:${app.eureka-password}@${app.eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+spring.cloud.gateway.routes:
+  # product-composite
+  - id: product-composite
+    uri: lb://product-composite
+    predicates:
+      - Path=/product-composite/**
+  - id: product-composite-swagger-ui
+    uri: lb://product-composite
+    predicates:
+      - Path=/openapi/**
+  - id: product-composite-swagger-ui-webjars
+    uri: lb://product-composite
+    predicates:
+      - Path=/webjars/**
+
+  # oauth2
+  - id: oauth2-server
+    uri: lb://auth-server
+    predicates:
+      - Path=/oauth2/**
+  - id: oauth2-login
+    uri: lb://auth-server
+    predicates:
+      - Path=/login/**
+
+  # eureka
+  - id: eureka-api
+    uri: http://localhost:8761
+    predicates:
+      - Path=/eureka/api/{segment}
+    filters:
+      - SetPath=/eureka/{segment}
+  - id: eureka-web-start
+    uri: http://localhost:8761
+    predicates:
+      - Path=/eureka/web
+    filters:
+      - SetPath=/
+  - id: eureka-web-other
+    uri: http://localhost:8761
+    predicates:
+      - Path=/eureka/**
+
+# security
+spring.security.oauth2.resourceserver.jwt.issuer-uri: http://localhost:9999

@@ -8,8 +8,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class RecommendationDto {
-  private int productId;
-  private int recommendationId;
+  private Integer productId;
+  private Integer recommendationId;
   private String author;
   private int rating;
   private String content;

@@ -1,6 +1,7 @@
 package com.example.composite.services;
 
 import static com.example.api.event.Event.Type.CREATE;
+import static com.example.api.event.Event.Type.DELETE;
 
 import com.example.api.core.product.ProductDto;
 import com.example.api.core.recommendation.RecommendationDto;
@@ -20,10 +21,12 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -102,37 +105,45 @@ public class ProductCompositeIntegration {
     }
   }
 
-  public ProductDto createProduct(ProductDto body) {
-    sendMessage("products-out-0",
-        new Event(CREATE, body.getProductId(), body));
-    return body;
-  }
-
-  public void deleteProduct(int productId) {
-    String url = serviceDiscovery.getProductService() + "/product/" + productId;
-    restTemplate.delete(url);
+  public void createProduct(ProductDto body) {
+    Event<Integer, ProductDto> event = new Event<>(CREATE, body.getProductId(), body);
+    sendMessage("productProducer-out-0", event);
   }
 
   public void createRecommendation(RecommendationDto body) {
-    String url = serviceDiscovery.getRecommendationService() + "/recommendation";
-    restTemplate.postForObject(
-        url, body, RecommendationDto.class);
-  }
-
-  public void deleteRecommendations(int productId) {
-    String url = serviceDiscovery.getRecommendationService() + "/recommendation/" + productId;
-    restTemplate.delete(url);
+    Event<Integer, RecommendationDto> event = new Event<>(CREATE, body.getRecommendationId(), body);
+    sendMessage("recommendationProducer-out-0", event);
   }
 
   public void createReview(ReviewDto body) {
-    String url = serviceDiscovery.getReviewService() + "/review";
-    restTemplate.postForObject(
-        url, body, RecommendationDto.class);
+    Event<Integer, ReviewDto> event = new Event<>(CREATE, body.getReviewId(), body);
+    sendMessage("reviewProducer-out-0", event);
   }
 
-  public void deleteReviews(int productId) {
-    String url = serviceDiscovery.getReviewService() + "/review/" + productId;
-    restTemplate.delete(url);
+  public void deleteProduct(Integer productId) {
+    Event<Integer, ProductDto> event = new Event<>(DELETE, productId);
+    sendMessage("productProducer-out-0", event);
+  }
+
+  public void deleteRecommendations(Integer productId) {
+    Event<Integer, ProductDto> event = new Event<>(DELETE, productId);
+    sendMessage("recommendationProducer-out-0", event);
+  }
+
+  public void deleteReviews(Integer productId) {
+    Event<Integer, ProductDto> event = new Event<>(DELETE, productId);
+    sendMessage("reviewProducer-out-0", event);
+  }
+
+
+
+  private ResponseEntity<String> checkEndpoint(String url) {
+    try {
+      return restTemplate.getForEntity(url, String.class);
+    } catch (RestClientException e) {
+      LOG.warn("Failed to connect to: {}", url, e);
+      return null;
+    }
   }
 
   private String getErrorMessage(HttpClientErrorException ex) {
@@ -144,7 +155,6 @@ public class ProductCompositeIntegration {
   }
 
   private void sendMessage(String bindingName, Event event) {
-    System.out.println(">>event " + event);
     Message<?> message = MessageBuilder.withPayload(event)
         .setHeader("partitionKey", event.getKey())
         .build();

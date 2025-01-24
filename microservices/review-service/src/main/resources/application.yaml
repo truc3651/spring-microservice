@@ -7,7 +7,13 @@ flyway:
   locations: filesystem:db/migration
   schema: reviews
 
+# health check
+management.endpoint.health.show-details: always
+management.endpoints.web.exposure.include: health
+
 spring:
+  application:
+    name: review
   datasource:
     url: jdbc:postgresql://localhost:5432/reviews?currentSchema=reviews
     username: postgres
@@ -18,3 +24,45 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  cloud:
+    function:
+      definition: messageProcessor
+    stream:
+      default:
+        contentType: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092
+        default:
+          consumer:
+            autoRebalanceEnabled: true
+        bindings:
+          messageProcessor-in-0:
+            consumer:
+              enableDlq: true
+              dlqName: review-dlq-topic
+      bindings:
+        messageProcessor-in-0:
+          destination: review-topic
+          group: review-group
+          consumer:
+            # retry
+            maxAttempts: 1
+            backOffInitialInterval: 500
+            backOffMaxInterval: 1000
+            backOffMultiplier: 2.0
+
+app:
+  eureka-server: localhost
+  eureka-username: username
+  eureka-password: password
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${app.eureka-username}:${app.eureka-password}@${app.eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5

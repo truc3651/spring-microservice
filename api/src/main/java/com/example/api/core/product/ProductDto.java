@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class ProductDto {
-  private int productId;
+  private Integer productId;
   private String name;
   private int weight;
 }

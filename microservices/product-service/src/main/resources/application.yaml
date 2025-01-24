@@ -7,7 +7,13 @@ flyway:
   locations: filesystem:db/migration
   schema: products
 
+# health check
+management.endpoint.health.show-details: always
+management.endpoints.web.exposure.include: health
+
 spring:
+  application:
+    name: product
   datasource:
     url: jdbc:postgresql://localhost:5432/products?currentSchema=products
     username: postgres
@@ -18,7 +24,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
   cloud:
     function:
       definition: messageProcessor
@@ -27,31 +32,37 @@ spring:
         contentType: application/json
       kafka:
         binder:
-          brokers: localhost
-          defaultBrokerPort: 9092
-          producer:
-            configuration:
-              value.serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          brokers: localhost:9092
+        default:
           consumer:
-            configuration:
-              value.deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-              spring.json.value.default.type: com.example.api.event.Event
+            autoRebalanceEnabled: true
         bindings:
-          messageProcessor-in-0.consumer:
-            enableDlq: true
-            dlqName: product-dead-letter-queue
+          messageProcessor-in-0:
+            consumer:
+              enableDlq: true
+              dlqName: product-dlq-topic
       bindings:
         messageProcessor-in-0:
-          destination: products
-          group: productsGroup
+          destination: product-topic
+          group: product-group
           consumer:
-            partitioned: true
-            instance-index: 0
-            # serialize
-            configuration:
-              spring.json.use.type.headers: false
             # retry
-            maxAttempts: 3
+            maxAttempts: 1
             backOffInitialInterval: 500
             backOffMaxInterval: 1000
             backOffMultiplier: 2.0
+
+app:
+  eureka-server: localhost
+  eureka-username: username
+  eureka-password: password
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${app.eureka-username}:${app.eureka-password}@${app.eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5

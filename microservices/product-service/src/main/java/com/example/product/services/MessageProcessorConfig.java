@@ -4,6 +4,7 @@ import com.example.api.core.product.ProductDto;
 import com.example.api.core.product.ProductService;
 import com.example.api.event.Event;
 import com.example.api.exceptions.EventProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -20,30 +21,22 @@ public class MessageProcessorConfig {
   @Bean
   public Consumer<Event<Integer, ProductDto>> messageProcessor() {
     return event -> {
-      LOG.info("Process message created at {}...", event.getEventCreatedAt());
+      Integer productId = event.getKey();
+      LOG.info("Process event product with id {}", productId);
 
       switch (event.getEventType()) {
-
         case CREATE:
+          LOG.info("Create product with ID: {}", productId);
           ProductDto product = event.getData();
-          LOG.info("Create product with ID: {}", product.getProductId());
           productService.createProduct(product);
           break;
 
         case DELETE:
-          int productId = event.getKey();
           LOG.info("Delete product with ProductID: {}", productId);
           productService.deleteProduct(productId);
           break;
-
-        default:
-          String errorMessage = "Incorrect event type: " + event.getEventType() + ", expected a CREATE or DELETE event";
-          LOG.warn(errorMessage);
-          throw new EventProcessingException(errorMessage);
       }
-
       LOG.info("Message processing done!");
-
     };
   }
 }

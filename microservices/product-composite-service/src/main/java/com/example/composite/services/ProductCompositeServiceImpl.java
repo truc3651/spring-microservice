@@ -7,34 +7,19 @@ import com.example.api.composite.product.ReviewSummary;
 import com.example.api.core.product.ProductDto;
 import com.example.api.core.recommendation.RecommendationDto;
 import com.example.api.core.review.ReviewDto;
-import com.example.composite.configs.ServiceDiscovery;
-import com.example.composite.product.review.microservices.util.ServiceUtil;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class ProductCompositeServiceImpl implements ProductCompositeService {
   private static final Logger LOG = LoggerFactory.getLogger(ProductCompositeServiceImpl.class);
   private final ProductCompositeIntegration integrationService;
-  private final ServiceUtil serviceUtil;
-  private final ServiceDiscovery serviceDiscovery;
 
-  public ProductCompositeServiceImpl(
-      ProductCompositeIntegration integrationService,
-      ServiceUtil serviceUtil,
-      ServiceDiscovery serviceDiscovery) {
-    this.serviceUtil = serviceUtil;
+  public ProductCompositeServiceImpl(ProductCompositeIntegration integrationService) {
     this.integrationService = integrationService;
-    this.serviceDiscovery = serviceDiscovery;
-  }
-
-  @GetMapping("/your-endpoint")
-  public String yourMethod() {
-    return "response";
   }
 
   @Override
@@ -73,13 +58,12 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
   public void createProduct(ProductAggregate body) {
     ProductDto product = new ProductDto(body.getProductId(),
         body.getName(), body.getWeight());
-    ProductDto savedProduct = integrationService.createProduct(product);
-    Integer productId = savedProduct.getProductId();
+    integrationService.createProduct(product);
 
     if (!CollectionUtils.isEmpty(body.getRecommendations())) {
       body.getRecommendations().forEach(r -> {
         RecommendationDto recommendation = new
-            RecommendationDto(productId,
+            RecommendationDto(body.getProductId(),
             r.getRecommendationId(), r.getAuthor(), r.getRate(),
             r.getContent());
         integrationService.createRecommendation(recommendation);
@@ -88,7 +72,7 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
 
     if (!CollectionUtils.isEmpty(body.getReviews())) {
       body.getReviews().forEach(r -> {
-        ReviewDto review = new ReviewDto(productId,
+        ReviewDto review = new ReviewDto(body.getProductId(),
             r.getReviewId(), r.getAuthor(), r.getSubject(),
             r.getContent());
         integrationService.createReview(review);
