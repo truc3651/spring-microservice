@@ -1,68 +1,13 @@
-server:
-  port: 8002
-
-flyway:
-  user: postgres
-  password: postgres
-  locations: filesystem:db/migration
-  schema: recommendations
-
-# health check
-management.endpoint.health.show-details: always
-management.endpoints.web.exposure.include: health
-
+spring.config.import: "optional:configserver:"
 spring:
-  application:
-    name: recommendation
-  datasource:
-    url: jdbc:postgresql://localhost:5432/recommendations?currentSchema=recommendations
-    username: postgres
-    password: postgres
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-  cloud:
-    function:
-      definition: messageProcessor
-    stream:
-      default:
-        contentType: application/json
-      kafka:
-        binder:
-          brokers: localhost:9092
-        default:
-          consumer:
-            autoRebalanceEnabled: true
-        bindings:
-          messageProcessor-in-0:
-            consumer:
-              enableDlq: true
-              dlqName: recommendation-dlq-topic
-      bindings:
-        messageProcessor-in-0:
-          destination: recommendation-topic
-          group: recommendation-group
-          consumer:
-            # retry
-            maxAttempts: 1
-            backOffInitialInterval: 500
-            backOffMaxInterval: 1000
-            backOffMultiplier: 2.0
-
-app:
-  eureka-server: localhost
-  eureka-username: username
-  eureka-password: password
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://${app.eureka-username}:${app.eureka-password}@${app.eureka-server}:8761/eureka/
-    initialInstanceInfoReplicationIntervalSeconds: 5
-    registryFetchIntervalSeconds: 5
-  instance:
-    leaseRenewalIntervalInSeconds: 5
-    leaseExpirationDurationInSeconds: 5
+  application.name: recommendation
+  cloud.config:
+    failFast: true
+    retry:
+      initialInterval: 3000
+      multiplier: 1.3
+      maxInterval: 10000
+      maxAttempts: 20
+    uri: http://localhost:8888
+    username: dev-usr
+    password: dev-pwd

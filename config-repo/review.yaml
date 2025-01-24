@@ -1,0 +1,49 @@
+server:
+  port: 8003
+
+flyway:
+  user: postgres
+  password: postgres
+  locations: filesystem:db/migration
+  schema: reviews
+
+spring:
+  application:
+    name: review
+  datasource:
+    url: jdbc:postgresql://localhost:5432/reviews?currentSchema=reviews
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  cloud:
+    function:
+      definition: messageProcessor
+    stream:
+      default:
+        contentType: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092
+        default:
+          consumer:
+            autoRebalanceEnabled: true
+        bindings:
+          messageProcessor-in-0:
+            consumer:
+              enableDlq: true
+              dlqName: review-dlq-topic
+      bindings:
+        messageProcessor-in-0:
+          destination: review-topic
+          group: review-group
+          consumer:
+            # retry
+            maxAttempts: 1
+            backOffInitialInterval: 500
+            backOffMaxInterval: 1000
+            backOffMultiplier: 2.0

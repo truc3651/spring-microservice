@@ -1,0 +1,20 @@
+app:
+  eureka-server: localhost
+  eureka-username: username
+  eureka-password: password
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://${app.eureka-username}:${app.eureka-password}@${app.eureka-server}:8761/eureka/
+    initialInstanceInfoReplicationIntervalSeconds: 5
+    registryFetchIntervalSeconds: 5
+  instance:
+    leaseRenewalIntervalInSeconds: 5
+    leaseExpirationDurationInSeconds: 5
+
+# health check
+management.endpoint.health.show-details: always
+management.endpoints.web.exposure.include: health
+
+

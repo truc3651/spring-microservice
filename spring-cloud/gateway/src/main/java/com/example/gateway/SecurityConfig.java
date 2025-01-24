@@ -31,7 +31,8 @@ public class SecurityConfig {
                 "/login/**",
                 "/error/**",
                 "/openapi/**",
-                "/webjars/**"
+                "/webjars/**",
+                "/config/**"
             ).permitAll() // Allow access to these paths without authentication
             .anyExchange().authenticated() // Require authentication for all other paths
         )
