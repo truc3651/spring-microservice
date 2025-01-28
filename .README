@@ -9,7 +9,7 @@ curl -k https://writer:secret-writer@localhost:8443/oauth2/token \
  -d grant_type=authorization_code \
  -d client_id=writer \
  -d redirect_uri=https://my.redirect.uri \
- -d code=rIU3ROBC2wW9UPZ6dzACqeDKYcnGLcNXWd0pIUr8KrcH-mqwuApMZ0zz0IAkIC8lgyYBfvE11UFZwnUI9SvuxLS2DfFF1Vxt3ouaUSAMhl6XhjddX0CnDVR4kFKq02Fb -s | jq .
+ -d code=mC342a9jswag_AsRLGg8SrVUXb3q4ws0WikqG6q3djevxyJx3b2AmTdVaBy7iY6LIgndLbkmlt5EHd-dY2mTJOPvA11zc95IMkCVZfdmZdapcX1ub-6Uhf1VNzZJi9V4 -s | jq .
 
 Access protected data
 curl https://localhost:8443/product-composite/7 -k -H "Authorization: Bearer $ACCESS_TOKEN" -i

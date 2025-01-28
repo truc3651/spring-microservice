@@ -10,7 +10,7 @@ import com.example.api.event.Event;
 import com.example.api.exceptions.InvalidInputException;
 import com.example.api.exceptions.NotFoundException;
 import com.example.composite.configs.ServiceDiscovery;
-import com.example.composite.product.review.microservices.util.ErrorMessage;
+import com.example.util.ErrorMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.List;
@@ -21,12 +21,10 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Component
@@ -83,8 +81,8 @@ public class ProductCompositeIntegration {
       String url = serviceDiscovery.getProductService() + "/product/" + productId;
       LOG.debug("About to call product service {}", url);
       ProductDto result = restTemplate.getForObject(
-              url,
-              ProductDto.class);
+          url,
+          ProductDto.class);
 
       LOG.debug("Found product with productId {}", productId);
       return result;
@@ -133,17 +131,6 @@ public class ProductCompositeIntegration {
   public void deleteReviews(Integer productId) {
     Event<Integer, ProductDto> event = new Event<>(DELETE, productId);
     sendMessage("reviewProducer-out-0", event);
-  }
-
-
-
-  private ResponseEntity<String> checkEndpoint(String url) {
-    try {
-      return restTemplate.getForEntity(url, String.class);
-    } catch (RestClientException e) {
-      LOG.warn("Failed to connect to: {}", url, e);
-      return null;
-    }
   }
 
   private String getErrorMessage(HttpClientErrorException ex) {

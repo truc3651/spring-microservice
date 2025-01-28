@@ -1,4 +1,4 @@
-package com.example.composite.product.review.microservices.util;
+package com.example.util;
 
 import java.time.OffsetDateTime;
 import org.springframework.http.HttpStatus;

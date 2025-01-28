@@ -11,3 +11,8 @@ spring:
     uri: http://localhost:8888
     username: dev-usr
     password: dev-pwd
+
+logging:
+  level:
+    root: INFO
+    com.example: INFO

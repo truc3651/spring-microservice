@@ -17,8 +17,10 @@
             <option value="$PROJECT_DIR$/microservices/review-service" />
             <option value="$PROJECT_DIR$/spring-cloud" />
             <option value="$PROJECT_DIR$/spring-cloud/authorization-server" />
+            <option value="$PROJECT_DIR$/spring-cloud/config-server" />
             <option value="$PROJECT_DIR$/spring-cloud/eureka-server" />
             <option value="$PROJECT_DIR$/spring-cloud/gateway" />
+            <option value="$PROJECT_DIR$/tracing" />
             <option value="$PROJECT_DIR$/util" />
           </set>
         </option>

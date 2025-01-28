@@ -6,7 +6,7 @@ spring:
     config:
       server:
         native:
-          searchLocations: file:${user.dir}/../../config-repo
+          searchLocations: file:${user.dir}/config-repo
   application:
     name: config-server
   security:
@@ -30,4 +30,4 @@ eureka:
     leaseExpirationDurationInSeconds: 5
 
 management.endpoint.health.show-details: always
-management.endpoints.web.exposure.include: health
+management.endpoints.web.exposure.include: *

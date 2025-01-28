@@ -4,7 +4,7 @@ import com.example.api.core.product.ProductDto;
 import com.example.api.core.product.ProductService;
 import com.example.api.exceptions.InvalidInputException;
 import com.example.api.exceptions.NotFoundException;
-import com.example.composite.product.review.microservices.util.ServiceUtil;
+import com.example.util.ServiceUtil;
 import com.example.product.persistence.ProductEntity;
 import com.example.product.persistence.ProductRepository;
 import lombok.RequiredArgsConstructor;

@@ -5,6 +5,8 @@ import com.example.api.core.review.ReviewService;
 import com.example.api.exceptions.InvalidInputException;
 import com.example.review.persistence.ReviewEntity;
 import com.example.review.persistence.ReviewRepository;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ public class ReviewServiceImpl implements ReviewService {
   private static final Logger LOG = LoggerFactory.getLogger(ReviewServiceImpl.class);
   private final ReviewRepository repository;
   private final ReviewMapper mapper;
+  private final ObservationRegistry registry;
 
   @Override
   public List<ReviewDto> getReviews(int productId) {

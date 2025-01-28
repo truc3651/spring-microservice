@@ -2,12 +2,9 @@ package com.example.recommendation.services;
 
 import com.example.api.core.recommendation.RecommendationDto;
 import com.example.api.core.recommendation.RecommendationService;
-import com.example.api.core.review.ReviewDto;
-import com.example.composite.product.review.microservices.util.ServiceUtil;
 import com.example.api.exceptions.InvalidInputException;
 import com.example.recommendation.persistence.RecommendationEntity;
 import com.example.recommendation.persistence.RecommendationRepository;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
